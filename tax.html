@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ٹیکس کیلکولیٹر</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      text-align: right;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #f5f5f5;
+    }
+    h2 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .calculator {
+      background-color: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #34495e;
+    }
+    input, select, button {
+      padding: 12px;
+      margin: 8px 0 15px 0;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #result {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      border-right: 4px solid #3498db;
+    }
+    .highlight {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    .note {
+      font-size: 14px;
+      color: #7f8c8d;
+      margin-top: 30px;
+      text-align: center;
+    }
+    .membership-display {
+      background-color: #e8f4fc;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calculator">
+    <h2>ٹیکس کیلکولیٹر</h2>
+
+    <label for="amount">رقم درج کریں:</label>
+    <input type="number" id="amount" placeholder="مثلاً 1000" min="0">
+
+    <label for="membership">ممبرشپ نمبر (اختیاری):</label>
+    <input type="text" id="membership" placeholder="اگر آپ کے پاس ہے تو درج کریں">
+
+    <label for="paymentType">ادائیگی کا طریقہ:</label>
+    <select id="paymentType">
+      <option value="">منتخب کریں</option>
+      <option value="cash">کیش (16% ٹیکس)</option>
+      <option value="card">کارڈ (5% ٹیکس)</option>
+    </select>
+
+    <button onclick="calculateTotal()">حساب کریں</button>
+
+    <div id="result"></div>
+  </div>
+
+  <p class="note">نوٹ: تمام حساب کتاب (ٹیکس، سروس چارجز اور رعایت) اصل رقم پر الگ الگ لگائے جاتے ہیں اور رقم کو مکمل گول کر دیا جاتا ہے</p>
+
+  <script>
+    function calculateTotal() {
+      const amountInput = document.getElementById("amount");
+      const paymentType = document.getElementById("paymentType").value;
+      const membership = document.getElementById("membership").value.trim();
+      const resultDiv = document.getElementById("result");
+
+      // Reset previous error styles
+      amountInput.style.borderColor = "#ddd";
+      document.getElementById("paymentType").style.borderColor = "#ddd";
+
+      // Validate inputs
+      if (!amountInput.value || isNaN(amountInput.value) || parseFloat(amountInput.value) <= 0) {
+        amountInput.style.borderColor = "red";
+        resultDiv.innerHTML = '<span class="highlight">براہ کرم درست رقم درج کریں۔</span>';
+        return;
+      }
+
+      if (!paymentType) {
+        document.getElementById("paymentType").style.borderColor = "red";
+        resultDiv.innerHTML = '<span class="highlight">براہ کرم ادائیگی کا طریقہ منتخب کریں۔</span>';
+        return;
+      }
+
+      const originalAmount = Math.round(parseFloat(amountInput.value));
+      let taxRate = paymentType === "cash" ? 0.16 : 0.05;
+      
+      // Calculate all components separately on original amount and round them
+      let tax = Math.round(originalAmount * taxRate);
+      let serviceCharge = Math.round(originalAmount * 0.10);
+      let discount = membership ? Math.round(originalAmount * 0.30) : 0;
+      
+      // Calculate final total (already rounded since components are rounded)
+      let finalTotal = originalAmount + tax + serviceCharge - discount;
+
+      resultDiv.innerHTML =
+        (membership ? `<div class="membership-display"><strong>ممبرشپ نمبر:</strong> ${membership}</div>` : "") +
+        `<p>اصل رقم: ${originalAmount.toLocaleString()}</p>` +
+        `<p>ٹیکس (${taxRate*100}%): ${tax.toLocaleString()}</p>` +
+        `<p>سروس چارجز (10%): ${serviceCharge.toLocaleString()}</p>` +
+        (discount > 0 ? `<p>رعایت (ممبرشپ 30%): -${discount.toLocaleString()}</p>` : "") +
+        `<p style="font-size: 18px; margin-top: 15px;"><strong>آخری رقم: <span class="highlight">${finalTotal.toLocaleString()}</span></strong></p>`;
+    }
+  </script>
+
+</body>
+</html>
