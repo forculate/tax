@@ -63,12 +63,6 @@
       color: #e74c3c;
       font-weight: bold;
     }
-    .note {
-      font-size: 14px;
-      color: #7f8c8d;
-      margin-top: 30px;
-      text-align: center;
-    }
     .membership-display {
       background-color: #e8f4fc;
       padding: 10px;
@@ -82,8 +76,11 @@
   <div class="calculator">
     <h2>ٹیکس کیلکولیٹر</h2>
 
-    <label for="amount">رقم درج کریں:</label>
+    <label for="amount">فی یونٹ قیمت درج کریں:</label>
     <input type="number" id="amount" placeholder="مثلاً 1000" min="0">
+
+    <label for="quantity">تعداد:</label>
+    <input type="number" id="quantity" placeholder="مثلاً 2" min="1" value="1">
 
     <label for="membership">ممبرشپ نمبر (اختیاری):</label>
     <input type="text" id="membership" placeholder="اگر آپ کے پاس ہے تو درج کریں">
@@ -100,23 +97,29 @@
     <div id="result"></div>
   </div>
 
-  <p class="note">نوٹ: تمام حساب کتاب (ٹیکس، سروس چارجز اور رعایت) اصل رقم پر الگ الگ لگائے جاتے ہیں اور رقم کو مکمل گول کر دیا جاتا ہے</p>
-
   <script>
     function calculateTotal() {
       const amountInput = document.getElementById("amount");
+      const quantityInput = document.getElementById("quantity");
       const paymentType = document.getElementById("paymentType").value;
       const membership = document.getElementById("membership").value.trim();
       const resultDiv = document.getElementById("result");
 
       // Reset previous error styles
       amountInput.style.borderColor = "#ddd";
+      quantityInput.style.borderColor = "#ddd";
       document.getElementById("paymentType").style.borderColor = "#ddd";
 
       // Validate inputs
       if (!amountInput.value || isNaN(amountInput.value) || parseFloat(amountInput.value) <= 0) {
         amountInput.style.borderColor = "red";
-        resultDiv.innerHTML = '<span class="highlight">براہ کرم درست رقم درج کریں۔</span>';
+        resultDiv.innerHTML = '<span class="highlight">براہ کرم درست قیمت درج کریں۔</span>';
+        return;
+      }
+
+      if (!quantityInput.value || isNaN(quantityInput.value) || parseInt(quantityInput.value) <= 0) {
+        quantityInput.style.borderColor = "red";
+        resultDiv.innerHTML = '<span class="highlight">براہ کرم درست تعداد درج کریں۔</span>';
         return;
       }
 
@@ -126,7 +129,9 @@
         return;
       }
 
-      const originalAmount = Math.round(parseFloat(amountInput.value));
+      const unitPrice = parseFloat(amountInput.value);
+      const quantity = parseInt(quantityInput.value);
+      const originalAmount = Math.round(unitPrice * quantity);
       let taxRate = paymentType === "cash" ? 0.16 : 0.05;
       
       // Calculate all components separately on original amount and round them
@@ -139,7 +144,9 @@
 
       resultDiv.innerHTML =
         (membership ? `<div class="membership-display"><strong>ممبرشپ نمبر:</strong> ${membership}</div>` : "") +
-        `<p>اصل رقم: ${originalAmount.toLocaleString()}</p>` +
+        `<p>فی یونٹ قیمت: ${unitPrice.toLocaleString()}</p>` +
+        `<p>تعداد: ${quantity.toLocaleString()}</p>` +
+        `<p>کل اصل رقم: ${originalAmount.toLocaleString()}</p>` +
         `<p>ٹیکس (${taxRate*100}%): ${tax.toLocaleString()}</p>` +
         `<p>سروس چارجز (10%): ${serviceCharge.toLocaleString()}</p>` +
         (discount > 0 ? `<p>رعایت (ممبرشپ 30%): -${discount.toLocaleString()}</p>` : "") +
